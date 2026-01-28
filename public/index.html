@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单微博 - 私密分享</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* 容器样式 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+        
+        /* 导航样式 */
+        nav {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        nav button {
+            padding: 0.5rem 1rem;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        
+        nav button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        nav button:hover {
+            background-color: #e0e0e0;
+        }
+        
+        nav button.active:hover {
+            background-color: #45a049;
+        }
+        
+        /* 页面样式 */
+        .page {
+            display: none;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* 表单样式 */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        label {
+            font-weight: 500;
+        }
+        
+        input, textarea {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        /* 按钮样式 */
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #da190b;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .card-time {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .card-content {
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
+        
+        /* 列表样式 */
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .list-item-info {
+            flex: 1;
+        }
+        
+        .list-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* 消息样式 */
+        .message {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* 加载样式 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .page {
+                padding: 1rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+            }
+            
+            nav button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header>
+            <h1>简单微博</h1>
+            <p id="user-info">欢迎使用私密分享系统</p>
+        </header>
+        
+        <!-- 导航 -->
+        <nav id="nav">
+            <ul>
+                <li><button id="nav-login" class="active" onclick="showPage('login')">登录/注册</button></li>
+                <li><button id="nav-my-posts" onclick="showPage('my-posts')">我的微博</button></li>
+                <li><button id="nav-friends" onclick="showPage('friends')">好友管理</button></li>
+                <li><button id="nav-friend-requests" onclick="showPage('friend-requests')">好友请求</button></li>
+            </ul>
+        </nav>
+        
+        <!-- 登录/注册页面 -->
+        <div id="login" class="page active">
+            <h2>登录/注册</h2>
+            
+            <!-- 登录表单 -->
+            <div style="margin-bottom: 2rem;">
+                <h3>登录</h3>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">用户名</label>
+                        <input type="text" id="login-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">密码</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">登录</button>
+                </form>
+            </div>
+            
+            <!-- 注册表单 -->
+            <div>
+                <h3>注册</h3>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-username">用户名</label>
+                        <input type="text" id="register-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">密码</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">注册</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 我的微博页面 -->
+        <div id="my-posts" class="page">
+            <h2>我的微博</h2>
+            
+            <!-- 创建留言表单 -->
+            <div style="margin-bottom: 2rem;">
+                <h3>发布新微博</h3>
+                <form id="post-form">
+                    <div class="form-group">
+                        <label for="post-content">内容</label>
+                        <textarea id="post-content" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">发布</button>
+                </form>
+            </div>
+            
+            <!-- 我的留言列表 -->
+            <div>
+                <h3>我的留言</h3>
+                <div id="my-posts-list" class="list">
+                    <!-- 留言将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 好友管理页面 -->
+        <div id="friends" class="page">
+            <h2>好友管理</h2>
+            
+            <!-- 添加好友表单 -->
+            <div style="margin-bottom: 2rem;">
+                <h3>添加好友</h3>
+                <form id="add-friend-form">
+                    <div class="form-group">
+                        <label for="friend-username">好友用户名</label>
+                        <input type="text" id="friend-username" required>
+                    </div>
+                    <button type="submit" class="btn-primary">发送请求</button>
+                </form>
+            </div>
+            
+            <!-- 好友列表 -->
+            <div>
+                <h3>我的好友</h3>
+                <div id="friends-list" class="list">
+                    <!-- 好友将通过JavaScript动态添加 -->
+                </div>
+            </div>
+            
+            <!-- 好友留言 -->
+            <div style="margin-top: 2rem;">
+                <h3>好友留言</h3>
+                <div id="friends-posts-list" class="list">
+                    <!-- 好友留言将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 好友请求页面 -->
+        <div id="friend-requests" class="page">
+            <h2>好友请求</h2>
+            <div id="friend-requests-list" class="list">
+                <!-- 好友请求将通过JavaScript动态添加 -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let currentUser = null;
+        
+        // API基础URL
+        const API_BASE = '/api';
+        
+        // 页面切换函数
+        function showPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // 显示选中页面
+            document.getElementById(pageId).classList.add('active');
+            
+            // 更新导航状态
+            document.querySelectorAll('nav button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById('nav-' + pageId).classList.add('active');
+            
+            // 如果用户已登录，加载对应页面的数据
+            if (currentUser) {
+                if (pageId === 'my-posts') {
+                    loadMyPosts();
+                } else if (pageId === 'friends') {
+                    loadFriends();
+                    loadFriendsPosts();
+                } else if (pageId === 'friend-requests') {
+                    loadFriendRequests();
+                }
+            }
+        }
+        
+        // 更新用户信息
+        function updateUserInfo() {
+            const userInfo = document.getElementById('user-info');
+            if (currentUser) {
+                userInfo.textContent = `欢迎，${currentUser.username}`;
+                // 显示所有导航按钮
+                document.querySelectorAll('nav button').forEach(button => {
+                    button.style.display = 'inline-block';
+                });
+            } else {
+                userInfo.textContent = '欢迎使用私密分享系统';
+                // 只显示登录按钮
+                document.querySelectorAll('nav button').forEach((button, index) => {
+                    if (index === 0) {
+                        button.style.display = 'inline-block';
+                    } else {
+                        button.style.display = 'none';
+                    }
+                });
+                // 强制显示登录页面
+                showPage('login');
+            }
+        }
+        
+        // 显示消息
+        function showMessage(message, type = 'success') {
+            const container = document.querySelector('.container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.textContent = message;
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+        
+        // 登录表单提交
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = data.user;
+                    updateUserInfo();
+                    showMessage('登录成功');
+                    showPage('my-posts');
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('登录失败，请稍后重试', 'error');
+                console.error('登录错误:', error);
+            }
+        });
+        
+        // 注册表单提交
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('注册成功，请登录');
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('注册失败，请稍后重试', 'error');
+                console.error('注册错误:', error);
+            }
+        });
+        
+        // 发布留言表单提交
+        document.getElementById('post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                showMessage('请先登录', 'error');
+                return;
+            }
+            
+            const content = document.getElementById('post-content').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/posts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId: currentUser.id, content })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('发布成功');
+                    document.getElementById('post-content').value = '';
+                    loadMyPosts();
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('发布失败，请稍后重试', 'error');
+                console.error('发布错误:', error);
+            }
+        });
+        
+        // 添加好友表单提交
+        document.getElementById('add-friend-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                showMessage('请先登录', 'error');
+                return;
+            }
+            
+            const friendUsername = document.getElementById('friend-username').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/friends/request`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userId: currentUser.id, friendUsername })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('好友请求已发送');
+                    document.getElementById('friend-username').value = '';
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('发送好友请求失败，请稍后重试', 'error');
+                console.error('添加好友错误:', error);
+            }
+        });
+        
+        // 加载我的留言
+        async function loadMyPosts() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/posts/${currentUser.id}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const postsList = document.getElementById('my-posts-list');
+                    postsList.innerHTML = '';
+                    
+                    if (data.posts.length === 0) {
+                        postsList.innerHTML = '<p>还没有留言，快来发布第一条吧！</p>';
+                    } else {
+                        data.posts.forEach(post => {
+                            const postElement = createPostElement(post);
+                            postsList.appendChild(postElement);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('加载留言错误:', error);
+            }
+        }
+        
+        // 加载好友列表
+        async function loadFriends() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/friends/${currentUser.id}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const friendsList = document.getElementById('friends-list');
+                    friendsList.innerHTML = '';
+                    
+                    if (data.friends.length === 0) {
+                        friendsList.innerHTML = '<p>还没有好友，快来添加吧！</p>';
+                    } else {
+                        data.friends.forEach(friend => {
+                            const friendElement = document.createElement('div');
+                            friendElement.className = 'list-item';
+                            friendElement.innerHTML = `
+                                <div class="list-item-info">
+                                    <div>${friend.username}</div>
+                                </div>
+                            `;
+                            friendsList.appendChild(friendElement);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('加载好友错误:', error);
+            }
+        }
+        
+        // 加载好友留言
+        async function loadFriendsPosts() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/friends/posts/${currentUser.id}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const postsList = document.getElementById('friends-posts-list');
+                    postsList.innerHTML = '';
+                    
+                    if (data.posts.length === 0) {
+                        postsList.innerHTML = '<p>好友还没有发布留言</p>';
+                    } else {
+                        data.posts.forEach(post => {
+                            const postElement = createPostElement(post, true);
+                            postsList.appendChild(postElement);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('加载好友留言错误:', error);
+            }
+        }
+        
+        // 加载好友请求
+        async function loadFriendRequests() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/friends/requests/${currentUser.id}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const requestsList = document.getElementById('friend-requests-list');
+                    requestsList.innerHTML = '';
+                    
+                    if (data.requests.length === 0) {
+                        requestsList.innerHTML = '<p>没有新的好友请求</p>';
+                    } else {
+                        data.requests.forEach(request => {
+                            const requestElement = document.createElement('div');
+                            requestElement.className = 'list-item';
+                            requestElement.innerHTML = `
+                                <div class="list-item-info">
+                                    <div>${request.username}</div>
+                                    <div style="font-size: 0.8rem; color: #666;">${new Date(request.created_at).toLocaleString()}</div>
+                                </div>
+                                <div class="list-item-actions">
+                                    <button class="btn-primary" onclick="acceptFriendRequest(${request.id})">接受</button>
+                                    <button class="btn-danger" onclick="rejectFriendRequest(${request.id})">拒绝</button>
+                                </div>
+                            `;
+                            requestsList.appendChild(requestElement);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('加载好友请求错误:', error);
+            }
+        }
+        
+        // 接受好友请求
+        async function acceptFriendRequest(requestId) {
+            try {
+                const response = await fetch(`${API_BASE}/friends/accept`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ friendshipId: requestId })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('好友请求已接受');
+                    loadFriendRequests();
+                    loadFriends();
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('接受好友请求失败，请稍后重试', 'error');
+                console.error('接受好友请求错误:', error);
+            }
+        }
+        
+        // 拒绝好友请求
+        async function rejectFriendRequest(requestId) {
+            try {
+                const response = await fetch(`${API_BASE}/friends/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ friendshipId: requestId })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('好友请求已拒绝');
+                    loadFriendRequests();
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('拒绝好友请求失败，请稍后重试', 'error');
+                console.error('拒绝好友请求错误:', error);
+            }
+        }
+        
+        // 创建留言元素
+        function createPostElement(post, isFriendPost = false) {
+            const postElement = document.createElement('div');
+            postElement.className = 'card';
+            
+            const header = document.createElement('div');
+            header.className = 'card-header';
+            
+            const title = document.createElement('div');
+            title.className = 'card-title';
+            title.textContent = isFriendPost ? post.username : '我';
+            
+            const time = document.createElement('div');
+            time.className = 'card-time';
+            time.textContent = new Date(post.created_at).toLocaleString();
+            
+            header.appendChild(title);
+            header.appendChild(time);
+            
+            const content = document.createElement('div');
+            content.className = 'card-content';
+            content.textContent = post.content;
+            
+            postElement.appendChild(header);
+            postElement.appendChild(content);
+            
+            return postElement;
+        }
+        
+        // 消息提醒轮询（可选功能）
+        function setupMessageReminder() {
+            setInterval(async () => {
+                if (!currentUser) return;
+                
+                try {
+                    // 检查好友请求
+                    const requestsResponse = await fetch(`${API_BASE}/friends/requests/${currentUser.id}`);
+                    const requestsData = await requestsResponse.json();
+                    
+                    if (requestsResponse.ok && requestsData.requests.length > 0) {
+                        // 可以在这里添加消息提醒逻辑
+                        console.log('有新的好友请求');
+                    }
+                    
+                    // 检查好友新留言
+                    const postsResponse = await fetch(`${API_BASE}/friends/posts/${currentUser.id}`);
+                    const postsData = await postsResponse.json();
+                    
+                    if (postsResponse.ok && postsData.posts.length > 0) {
+                        // 可以在这里添加消息提醒逻辑
+                        console.log('有好友新留言');
+                    }
+                } catch (error) {
+                    console.error('消息提醒轮询错误:', error);
+                }
+            }, 60000); // 60秒轮询一次
+        }
+        
+        // 初始化
+        function init() {
+            updateUserInfo();
+            // 启用消息提醒（可选）
+            setupMessageReminder();
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
